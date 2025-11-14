@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Chat tipo WhatsApp</title>
+<style>
+    body {
+        background: #ece5dd;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    .chat-container {
+        width: 100%;
+        max-width: 480px;
+        height: 100vh;
+        background: #fff;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        border-left: 1px solid #ccc;
+        border-right: 1px solid #ccc;
+    }
+
+    /* Header */
+    .chat-header {
+        background: #075E54;
+        color: white;
+        padding: 15px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    /* Chat messages area */
+    .chat-box {
+        flex: 1;
+        padding: 10px;
+        overflow-y: auto;
+        background: #e5ddd5;
+    }
+
+    /* Message bubbles */
+    .message {
+        max-width: 80%;
+        padding: 8px 12px;
+        margin: 8px 0;
+        border-radius: 8px;
+        line-height: 1.4;
+        font-size: 16px;
+    }
+
+    .user {
+        background: #DCF8C6;
+        align-self: flex-end;
+    }
+
+    .bot {
+        background: white;
+        align-self: flex-start;
+    }
+
+    /* Input area */
+    .input-area {
+        display: flex;
+        padding: 10px;
+        background: #f0f0f0;
+    }
+
+    .input-area input {
+        flex: 1;
+        padding: 10px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 20px;
+        outline: none;
+    }
+
+    .input-area button {
+        margin-left: 10px;
+        padding: 10px 20px;
+        background: #128C7E;
+        color: white;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">Contacto</div>
+
+    <div class="chat-box" id="chatBox">
+        <!-- Mensajes aparecerán aquí -->
+        <div class="message bot">
+            Hola, soy *Agente X*. ¿Cuál es la palabra clave para comenzar?
+        </div>
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Escribe un mensaje...">
+        <button onclick="sendMessage()">Enviar</button>
+    </div>
+</div>
+
+<script>
+    function sendMessage() {
+        const input = document.getElementById("userInput");
+        const text = input.value.trim();
+        if (text === "") return;
+
+        // Mostrar mensaje del usuario
+        addMessage(text, "user");
+        input.value = "";
+
+        // Procesar respuesta del bot
+        botResponse(text.toLowerCase());
+    }
+
+    function addMessage(text, sender) {
+        const chatBox = document.getElementById("chatBox");
+        const msg = document.createElement("div");
+        msg.classList.add("message", sender);
+        msg.innerText = text;
+        chatBox.appendChild(msg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    /* ------------------------------
+       LÓGICA DEL BOT (EDITABLE)
+       ------------------------------ */
+
+    function botResponse(text) {
+
+        // NIVEL 1: contraseña inicial
+        if (text.includes("llave")) {
+            addMessage("Correcto. Segunda pregunta: ¿qué objeto falta en la mesa?", "bot");
+            return;
+        }
+
+        // NIVEL 2: respuesta correcta
+        if (text.includes("cuaderno") || text.includes("libreta")) {
+            addMessage("Exacto. Última: escribe la palabra secreta final.", "bot");
+            return;
+        }
+
+        // NIVEL 3: palabra final
+        if (text.includes("victoria")) {
+            addMessage("¡Enhorabuena! Has completado la misión.", "bot");
+            return;
+        }
+
+        // Respuesta para errores
+        addMessage("No es correcto. Intenta otra vez.", "bot");
+    }
+</script>
+
+</body>
+</html>
