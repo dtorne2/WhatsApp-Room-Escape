@@ -1,163 +1,404 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="ca">
 <head>
-<meta charset="UTF-8">
-<title>Chat tipo WhatsApp</title>
-<style>
+  <meta charset="UTF-8" />
+  <title>Chat estil WhatsApp - Gutenberg Bot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
     body {
-        background: #ece5dd;
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
+      background: #0b141a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 10px;
     }
 
-    .chat-container {
-        width: 100%;
-        max-width: 480px;
-        height: 100vh;
-        background: #fff;
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        border-left: 1px solid #ccc;
-        border-right: 1px solid #ccc;
+    .chat-wrapper {
+      background: #111b21;
+      width: 100%;
+      max-width: 420px;
+      height: 85vh;
+      max-height: 780px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
-    /* Header */
     .chat-header {
-        background: #075E54;
-        color: white;
-        padding: 15px;
-        font-size: 18px;
-        font-weight: bold;
+      background: #202c33;
+      color: #e9edef;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
-    /* Chat messages area */
-    .chat-box {
-        flex: 1;
-        padding: 10px;
-        overflow-y: auto;
-        background: #e5ddd5;
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #00a884;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: #111b21;
+      flex-shrink: 0;
     }
 
-    /* Message bubbles */
+    .header-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .contact-name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .contact-status {
+      font-size: 11px;
+      color: #8696a0;
+    }
+
+    .chat-messages {
+      flex: 1;
+      background: url("https://i.imgur.com/8eGQx7i.png");
+      background-size: cover;
+      padding: 10px 8px;
+      overflow-y: auto;
+    }
+
+    .message-row {
+      display: flex;
+      margin-bottom: 6px;
+    }
+
+    .message-row.user {
+      justify-content: flex-end;
+    }
+
+    .message-row.bot {
+      justify-content: flex-start;
+    }
+
     .message {
-        max-width: 80%;
-        padding: 8px 12px;
-        margin: 8px 0;
-        border-radius: 8px;
-        line-height: 1.4;
-        font-size: 16px;
+      max-width: 75%;
+      padding: 6px 8px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.3;
+      position: relative;
+      word-wrap: break-word;
+      white-space: pre-wrap;
     }
 
-    .user {
-        background: #DCF8C6;
-        align-self: flex-end;
+    .message.user .bubble {
+      background: #005c4b;
+      color: #e9edef;
+      border-bottom-right-radius: 0;
     }
 
-    .bot {
-        background: white;
-        align-self: flex-start;
+    .message.bot .bubble {
+      background: #202c33;
+      color: #e9edef;
+      border-bottom-left-radius: 0;
     }
 
-    /* Input area */
-    .input-area {
-        display: flex;
-        padding: 10px;
-        background: #f0f0f0;
+    .time {
+      font-size: 10px;
+      color: #8696a0;
+      margin-left: 5px;
+      align-self: flex-end;
     }
 
-    .input-area input {
-        flex: 1;
-        padding: 10px;
-        font-size: 16px;
-        border: 1px solid #ccc;
-        border-radius: 20px;
-        outline: none;
+    .chat-input-area {
+      background: #202c33;
+      padding: 6px 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .input-area button {
-        margin-left: 10px;
-        padding: 10px 20px;
-        background: #128C7E;
-        color: white;
-        border: none;
-        border-radius: 20px;
-        cursor: pointer;
-        font-size: 16px;
+    .chat-input-area input[type="text"] {
+      flex: 1;
+      background: #2a3942;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 12px;
+      color: #e9edef;
+      font-size: 13px;
+      outline: none;
     }
-</style>
+
+    .chat-input-area button {
+      background: #00a884;
+      border: none;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .chat-input-area button span {
+      color: #111b21;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .helper {
+      font-size: 10px;
+      color: #8696a0;
+      text-align: center;
+      padding: 4px 8px;
+      background: rgba(17, 27, 33, 0.9);
+    }
+
+    .chat-messages::-webkit-scrollbar {
+      width: 6px;
+    }
+    .chat-messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.2);
+      border-radius: 3px;
+    }
+  </style>
 </head>
-
 <body>
-
-<div class="chat-container">
-    <div class="chat-header">Contacto</div>
-
-    <div class="chat-box" id="chatBox">
-        <!-- Mensajes aparecerán aquí -->
-        <div class="message bot">
-            Hola, soy *Agente X*. ¿Cuál es la palabra clave para comenzar?
-        </div>
+  <div class="chat-wrapper">
+    <div class="chat-header">
+      <div class="avatar">G</div>
+      <div class="header-info">
+        <div class="contact-name">Gutenberg Bot</div>
+        <div class="contact-status">en línia</div>
+      </div>
     </div>
 
-    <div class="input-area">
-        <input type="text" id="userInput" placeholder="Escribe un mensaje...">
-        <button onclick="sendMessage()">Enviar</button>
+    <div class="helper">
+      Escriu com si fos WhatsApp. El bot respon segons paraules clau i el “moment” del diàleg.
     </div>
-</div>
 
-<script>
-    function sendMessage() {
-        const input = document.getElementById("userInput");
-        const text = input.value.trim();
-        if (text === "") return;
+    <div id="chatMessages" class="chat-messages"></div>
 
-        // Mostrar mensaje del usuario
-        addMessage(text, "user");
-        input.value = "";
+    <div class="chat-input-area">
+      <input
+        type="text"
+        id="chatInput"
+        placeholder="Escriu un missatge"
+        autocomplete="off"
+      />
+      <button id="sendButton" aria-label="Enviar">
+        <span>➤</span>
+      </button>
+    </div>
+  </div>
 
-        // Procesar respuesta del bot
-        botResponse(text.toLowerCase());
+  <script>
+    /************************************************************
+     * ESTATS DEL GUIÓ:
+     * - A1: Hola! Com et dius?  (espera nom, qualsevol cosa)
+     * - A2: En què et puc ajudar? (clau/contrasenya... → A3; si no → A2.2)
+     * - A3: Quin és el meu nom? (Gutenberg... → A4; si no → A3.2)
+     * - A4: Recordes on vaig nèixer? (Alemanya/Magúncia... → FI; si no → A4.2)
+     ************************************************************/
+
+    let currentState = "A1";
+    let userName = "";
+
+    // REGLES B1 (respostes correctes) per a cada estat
+    const botRules = [
+      {
+        // A2: En què et puc ajudar? → paraules sobre contrasenya
+        state: "A2",
+        keywords: [
+          "clau",
+          "contrassenya",
+          "contrasenya",
+          "codi",
+          "contraseña",
+          "contrasseña",
+          "números",
+          "numeros",
+          "combinació",
+          "combinacion"
+        ],
+        reply:
+          "Ahh sí, la contrassenya! Crec que jo tenia un codi per activar el sistema d’autoreparació de la màquina del temps! El problema és que ha passat molt de temps i no el recordo.\nAjuda’m a recuperar la memòria contestant unes preguntes sobre mi.\nQuin és el meu nom?",
+        nextState: "A3"
+      },
+      {
+        // A3: Quin és el meu nom? → variants de Gutenberg
+        state: "A3",
+        keywords: [
+          "gutenberg",
+          "gutemberg",
+          "guttemberg",
+          "guttenberg"
+        ],
+        reply:
+          "Gràcies per ajudar-me, ja vaig recuperant la memòria. Però encara necessito més informació.\nRecordes on vaig nèixer?",
+        nextState: "A4"
+      },
+      {
+        // A4: Recordes on vaig nèixer? → Alemanya / Magúncia
+        state: "A4",
+        keywords: [
+          "alemanya",
+          "alemania",
+          "magúncia",
+          "maguncia",
+          "magúncia",
+          "magúncia",
+          "magúncia"
+        ],
+        reply:
+          "Exacte! Recordes perfectament on vaig nèixer. 👏\n(A partir d’aquí podem afegir més preguntes o revelar el codi final.)",
+        nextState: "FI"
+      }
+    ];
+
+    // Respostes Ax.2 (quan NO hi ha cap paraula clau B1)
+    const fallbackReplies = {
+      A2: "Ho sento, no t’he entés. En què puc ajudar-te?",
+      A3: "Ho sento, no t’he entés. Quin és el meu nom?",
+      A4: "Ho sento, no t’he entés. On vaig nèixer?"
+    };
+
+    // Missatge genèric per si algun estat no te fallback específic
+    const defaultReply =
+      "No acabo d’entendre el que m’has escrit... Prova d’una altra manera.";
+
+    const chatMessagesEl = document.getElementById("chatMessages");
+    const chatInputEl = document.getElementById("chatInput");
+    const sendButtonEl = document.getElementById("sendButton");
+
+    // A1: Missatge inicial
+    window.addEventListener("load", () => {
+      addBotMessage("Hola! Com et dius?");
+    });
+
+    // Enviar amb botó
+    sendButtonEl.addEventListener("click", () => {
+      handleSend();
+    });
+
+    // Enviar amb ENTER
+    chatInputEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleSend();
+      }
+    });
+
+    function handleSend() {
+      const text = chatInputEl.value.trim();
+      if (!text) return;
+
+      addUserMessage(text);
+      chatInputEl.value = "";
+      processBotReply(text);
     }
 
-    function addMessage(text, sender) {
-        const chatBox = document.getElementById("chatBox");
-        const msg = document.createElement("div");
-        msg.classList.add("message", sender);
-        msg.innerText = text;
-        chatBox.appendChild(msg);
-        chatBox.scrollTop = chatBox.scrollHeight;
+    function addUserMessage(text) {
+      addMessage("user", text);
     }
 
-    /* ------------------------------
-       LÓGICA DEL BOT (EDITABLE)
-       ------------------------------ */
-
-    function botResponse(text) {
-
-        // NIVEL 1: contraseña inicial
-        if (text.includes("llave")) {
-            addMessage("Correcto. Segunda pregunta: ¿qué objeto falta en la mesa?", "bot");
-            return;
-        }
-
-        // NIVEL 2: respuesta correcta
-        if (text.includes("cuaderno") || text.includes("libreta")) {
-            addMessage("Exacto. Última: escribe la palabra secreta final.", "bot");
-            return;
-        }
-
-        // NIVEL 3: palabra final
-        if (text.includes("victoria")) {
-            addMessage("¡Enhorabuena! Has completado la misión.", "bot");
-            return;
-        }
-
-        // Respuesta para errores
-        addMessage("No es correcto. Intenta otra vez.", "bot");
+    function addBotMessage(text) {
+      addMessage("bot", text);
     }
-</script>
 
+    function addMessage(sender, text) {
+      const row = document.createElement("div");
+      row.classList.add("message-row", sender);
+
+      const msg = document.createElement("div");
+      msg.classList.add("message", sender);
+
+      const bubble = document.createElement("div");
+      bubble.classList.add("bubble");
+      bubble.textContent = text;
+
+      const timeEl = document.createElement("span");
+      timeEl.classList.add("time");
+      timeEl.textContent = getCurrentTime();
+
+      msg.appendChild(bubble);
+      msg.appendChild(timeEl);
+      row.appendChild(msg);
+      chatMessagesEl.appendChild(row);
+
+      chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+    }
+
+    function getCurrentTime() {
+      const now = new Date();
+      const h = now.getHours().toString().padStart(2, "0");
+      const m = now.getMinutes().toString().padStart(2, "0");
+      return `${h}:${m}`;
+    }
+
+    function processBotReply(userText) {
+      const normalized = userText.toLowerCase();
+
+      /*********************
+       * ESTAT A1: NOM (B: “X”)
+       * Accepta qualsevol cosa i passa a A2 amb nom personalitzat.
+       *********************/
+      if (currentState === "A1") {
+        userName = userText.trim();
+        const replyA2 = `Encantat de coneixe’t ${userName}. En què et puc ajudar?`;
+        addBotMessage(replyA2);
+        currentState = "A2";
+        return;
+      }
+
+      /*********************
+       * RESTA D’ESTATS: busquem paraules clau B1
+       *********************/
+      const candidates = botRules.filter((rule) => rule.state === currentState);
+      let selectedRule = null;
+
+      for (const rule of candidates) {
+        if (
+          rule.keywords.some((keyword) =>
+            normalized.includes(keyword.toLowerCase())
+          )
+        ) {
+          selectedRule = rule;
+          break;
+        }
+      }
+
+      if (selectedRule) {
+        // B1: resposta correcta → Ax + canvi d’estat
+        addBotMessage(selectedRule.reply);
+        if (selectedRule.nextState) {
+          currentState = selectedRule.nextState;
+        }
+      } else {
+        // B2: sense cap paraula clau → Ax.2
+        const fb = fallbackReplies[currentState];
+        addBotMessage(fb || defaultReply);
+        // IMPORTANT: no canviem d’estat, es queda on és (Ax)
+      }
+    }
+  </script>
 </body>
 </html>
+
