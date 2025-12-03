@@ -203,21 +203,21 @@
     <div id="chatMessages" class="chat-messages"></div>
 
     <div class="chat-input-area">
-      <input type="text" id="chatInput" placeholder="Escriu un missatge" autocomplete="off"/>
+      <input type="text" id="chatInput" placeholder="Escriu un missatge" autocomplete="off" />
       <button id="sendButton" aria-label="Enviar"><span>➤</span></button>
     </div>
   </div>
 
   <script>
     /************************************************************
-     * ESTATS DEL GUIÓ A1–A9 COMPLETS
+     * ESTATS DEL GUIÓ A1–A8 + FINAL AUTOMÀTIC
      ************************************************************/
-    
+
     let currentState = "A1";
     let userName = "";
 
     const botRules = [
-      /* A2 */
+      /* A2 — En què et puc ajudar? */
       {
         state: "A2",
         keywords: [
@@ -229,18 +229,18 @@
         nextState: "A3"
       },
 
-      /* A3 */
+      /* A3 — Quin és el meu nom? */
       {
         state: "A3",
         keywords: [
           "gutenberg", "gutemberg", "guttemberg", "guttenberg"
         ],
         reply:
-          "Gràcies per ajudar-me, ja vaig recuperant la memòria. Però encara necessito més informació.\nRecordes on vaig néixer?",
+          "Ja ho recordo! Jo soc en Johannes Gutenberg! Moltes gràcies per ajudar-me, ja vaig recuperant la memòria. Però encara necessito més informació.\nRecordes on vaig néixer?",
         nextState: "A4"
       },
 
-      /* A4 */
+      /* A4 — On vaig néixer? */
       {
         state: "A4",
         keywords: [
@@ -252,7 +252,7 @@
         nextState: "A5"
       },
 
-      /* A5 */
+      /* A5 — Què vaig inventar? */
       {
         state: "A5",
         keywords: [
@@ -263,7 +263,7 @@
         nextState: "A6"
       },
 
-      /* A6 */
+      /* A6 — Com s’escrivien els llibres abans? */
       {
         state: "A6",
         keywords: [
@@ -274,7 +274,7 @@
         nextState: "A7"
       },
 
-      /* A7 */
+      /* A7 — Material de les lletres */
       {
         state: "A7",
         keywords: [
@@ -286,19 +286,13 @@
         reply:
           "Ja quasi la tinc!\nQuin és el primer llibre que vaig imprimir amb la impremta?",
         nextState: "A8"
-      },
-
-      /* A8 */
-      {
-        state: "A8",
-        keywords: [
-          "biblia", "bíblia", "Biblia", "Bíblia",
-          "biblias", "biblies", "Bíblies", "Biblias"
-        ],
-        reply:
-          "Perfecte! Ja només queda una última cosa...",
-        nextState: "A9"
       }
+      /* A8 la tractem a part per enviar directament el final */
+    ];
+
+    // Paraules clau correcta per a A8
+    const A8Keywords = [
+      "biblia", "bíblia", "biblias", "biblies", "bíblies"
     ];
 
     const fallbackReplies = {
@@ -311,11 +305,14 @@
       A8: "Ho sento, no t’he entès. Quin és el primer llibre que vaig imprimir amb la impremta?"
     };
 
-
     /************************************************************
-     * FUNCIÓ TIPING + ENVIAMENT AMB RETARD
+     * TIPING + MISSATGES AMB RETARD
      ************************************************************/
-    
+
+    const chatMessagesEl = document.getElementById("chatMessages");
+    const chatInputEl = document.getElementById("chatInput");
+    const sendButtonEl = document.getElementById("sendButton");
+
     function showTyping() {
       if (document.getElementById("typingIndicator")) return;
       const row = document.createElement("div");
@@ -349,14 +346,9 @@
       }, delay);
     }
 
-
     /************************************************************
-     * CONTROL DEL XAT
+     * INICIALITZACIÓ
      ************************************************************/
-    
-    const chatMessagesEl = document.getElementById("chatMessages");
-    const chatInputEl = document.getElementById("chatInput");
-    const sendButtonEl = document.getElementById("sendButton");
 
     window.addEventListener("load", () => {
       delayedBotMessage("Hola! Com et dius?");
@@ -372,11 +364,15 @@
 
     function handleSend() {
       const text = chatInputEl.value.trim();
-      if (!text) return;
+      if (!text || currentState === "FI") return;
       addUserMessage(text);
       chatInputEl.value = "";
       processBotReply(text);
     }
+
+    /************************************************************
+     * AFEGIR MISSATGES AL XAT
+     ************************************************************/
 
     function addUserMessage(text) {
       addMessage("user", text);
@@ -399,7 +395,10 @@
 
       const timeEl = document.createElement("span");
       timeEl.classList.add("time");
-      timeEl.textContent = new Date().toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
+      timeEl.textContent = new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
 
       msg.appendChild(bubble);
       msg.appendChild(timeEl);
@@ -408,15 +407,14 @@
       chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
     }
 
-
     /************************************************************
-     * PROCESSADOR DE RESPOSTES A1–A9
+     * LÒGICA DE RESPOSTA DEL BOT
      ************************************************************/
-    
+
     function processBotReply(text) {
       const normalized = text.toLowerCase();
 
-      /* A1 — Nom */
+      // A1 — Nom (accepta qualsevol cosa)
       if (currentState === "A1") {
         userName = text.trim();
         delayedBotMessage(`Encantat de conèixer-te ${userName}. En què et puc ajudar?`);
@@ -424,7 +422,24 @@
         return;
       }
 
-      /* Buscar regla B1 */
+      // A8 — tractament especial: si és correcta, envia directament el missatge final (A9)
+      if (currentState === "A8") {
+        const isCorrect = A8Keywords.some(k => normalized.includes(k));
+        if (isCorrect) {
+          const finalMsg =
+            "Genial. Moltíssimes gràcies! Ja he recuperat la memòria!\n" +
+            "El codi per activar el sistema d’autoreparació de la màquina del temps és \"curasana\".\n" +
+            "Espero que et sigui útil i puguis reparar-la.\n" +
+            `Encantat d’haver-te conegut ${userName}. Fins a la propera!`;
+          delayedBotMessage(finalMsg);
+          currentState = "FI";
+        } else {
+          delayedBotMessage(fallbackReplies["A8"]);
+        }
+        return;
+      }
+
+      // Per a A2–A7: busquem regla B1
       const candidates = botRules.filter(r => r.state === currentState);
       const matchedRule = candidates.find(rule =>
         rule.keywords.some(k => normalized.includes(k))
@@ -436,25 +451,15 @@
         return;
       }
 
-      /* B2 — resposta incorrecta */
+      // B2 — resposta incorrecta: Ax.2
       if (fallbackReplies[currentState]) {
         delayedBotMessage(fallbackReplies[currentState]);
         return;
       }
 
-      /* A9 — final */
-      if (currentState === "A9") {
-        delayedBotMessage(
-          `Genial. Moltíssimes gràcies! Ja he recuperat la memòria!\n` +
-          `El codi per activar el sistema d’autoreparació de la màquina del temps és "curasana".\n` +
-          `Espero que et sigui útil i puguis reparar-la.\n` +
-          `Encantat d’haver-te conegut ${userName}. Fins a la propera!`
-        );
-        currentState = "FI";
-        return;
-      }
+      // Per si de cas queda algun cas no contemplat
+      delayedBotMessage("No acabo d’entendre el que m’has escrit... Prova-ho d’una altra manera.");
     }
-
   </script>
 </body>
 </html>
