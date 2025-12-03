@@ -2,7 +2,7 @@
 <html lang="ca">
 <head>
   <meta charset="UTF-8" />
-  <title>Chat estil WhatsApp - GhostApp</title>
+  <title>GhostApp - Xat històric</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     * {
@@ -73,9 +73,8 @@
 
     .chat-messages {
       flex: 1;
-      background: url("https://i.etsystatic.com/10868806/r/il/7115ba/5796316827/il_570xN.5796316827_hkyo.jpg");
-      background-size: cover;
-      background-position: center;
+      /* FONS FOSC TIPUS WHATSAPP, SENSE IMATGE EXTERNA */
+      background: radial-gradient(circle at top left, #202c33 0%, #111b21 45%, #0b141a 100%);
       padding: 10px 8px;
       overflow-y: auto;
     }
@@ -179,6 +178,13 @@
       background: rgba(255,255,255,0.2);
       border-radius: 3px;
     }
+
+    /* Indicador "escrivint..." */
+    .typing-bubble {
+      font-size: 11px;
+      font-style: italic;
+      opacity: 0.8;
+    }
   </style>
 </head>
 <body>
@@ -197,5 +203,239 @@
 
     <div id="chatMessages" class="chat-messages"></div>
 
-    <div cl
+    <div class="chat-input-area">
+      <input
+        type="text"
+        id="chatInput"
+        placeholder="Escriu un missatge"
+        autocomplete="off"
+      />
+      <button id="sendButton" aria-label="Enviar">
+        <span>➤</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    /************************************************************
+     * ESTATS DEL GUIÓ:
+     * - A1: Hola! Com et dius?  (espera nom, qualsevol cosa)
+     * - A2: En què et puc ajudar? (clau/contrasenya... → A3; si no → A2.2)
+     * - A3: Quin és el meu nom? (Gutenberg... → A4; si no → A3.2)
+     * - A4: Recordes on vaig nèixer? (Alemanya/Magúncia... → FI; si no → A4.2)
+     ************************************************************/
+
+    let currentState = "A1";
+    let userName = "";
+
+    // REGLES B1 (respostes correctes) per a cada estat
+    const botRules = [
+      {
+        // A2: En què et puc ajudar? → paraules sobre contrasenya
+        state: "A2",
+        keywords: [
+          "clau",
+          "contrassenya",
+          "contrasenya",
+          "codi",
+          "contraseña",
+          "contrasseña",
+          "números",
+          "numeros",
+          "combinació",
+          "combinacion"
+        ],
+        reply:
+          "Ahh sí, la contrassenya! Crec que jo tenia un codi per activar el sistema d’autoreparació de la màquina del temps! El problema és que ha passat molt de temps i no el recordo.\nAjuda’m a recuperar la memòria contestant unes preguntes sobre mi.\nQuin és el meu nom?",
+        nextState: "A3"
+      },
+      {
+        // A3: Quin és el meu nom? → variants de Gutenberg
+        state: "A3",
+        keywords: [
+          "gutenberg",
+          "gutemberg",
+          "guttemberg",
+          "guttenberg"
+        ],
+        reply:
+          "Gràcies per ajudar-me, ja vaig recuperant la memòria. Però encara necessito més informació.\nRecordes on vaig nèixer?",
+        nextState: "A4"
+      },
+      {
+        // A4: Recordes on vaig nèixer? → Alemanya / Magúncia
+        state: "A4",
+        keywords: [
+          "alemanya",
+          "alemania",
+          "magúncia",
+          "maguncia"
+        ],
+        reply:
+          "Exacte! Recordes perfectament on vaig nèixer. 👏\n(A partir d’aquí podem afegir més preguntes o revelar el codi final.)",
+        nextState: "FI"
+      }
+    ];
+
+    // Respostes Ax.2 (quan NO hi ha cap paraula clau B1)
+    const fallbackReplies = {
+      A2: "Ho sento, no t’he entés. En què puc ajudar-te?",
+      A3: "Ho sento, no t’he entés. Quin és el meu nom?",
+      A4: "Ho sento, no t’he entés. On vaig nèixer?"
+    };
+
+    // Missatge genèric per si algun estat no te fallback específic
+    const defaultReply =
+      "No acabo d’entendre el que m’has escrit... Prova d’una altra manera.";
+
+    const chatMessagesEl = document.getElementById("chatMessages");
+    const chatInputEl = document.getElementById("chatInput");
+    const sendButtonEl = document.getElementById("sendButton");
+
+    // ---------- FUNCIONS TIPING INDICATOR ----------
+
+    function showTyping() {
+      if (document.getElementById("typingIndicator")) return; // ja està mostrant
+      const row = document.createElement("div");
+      row.classList.add("message-row", "bot");
+      row.id = "typingIndicator";
+
+      const msg = document.createElement("div");
+      msg.classList.add("message", "bot");
+
+      const bubble = document.createElement("div");
+      bubble.classList.add("bubble", "typing-bubble");
+      bubble.textContent = "Escrivint...";
+
+      msg.appendChild(bubble);
+      row.appendChild(msg);
+      chatMessagesEl.appendChild(row);
+      chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+    }
+
+    function hideTyping() {
+      const typingEl = document.getElementById("typingIndicator");
+      if (typingEl) {
+        chatMessagesEl.removeChild(typingEl);
+      }
+    }
+
+    function delayedBotMessage(text) {
+      showTyping();
+      const delay = 1200 + Math.random() * 800; // entre 1,2 i 2 segons aprox.
+      setTimeout(() => {
+        hideTyping();
+        addBotMessage(text);
+      }, delay);
+    }
+
+    // ---------- INICIALITZACIÓ: A1 ----------
+
+    window.addEventListener("load", () => {
+      delayedBotMessage("Hola! Com et dius?");
+    });
+
+    // Enviar amb botó
+    sendButtonEl.addEventListener("click", () => {
+      handleSend();
+    });
+
+    // Enviar amb ENTER
+    chatInputEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleSend();
+      }
+    });
+
+    function handleSend() {
+      const text = chatInputEl.value.trim();
+      if (!text) return;
+
+      addUserMessage(text);
+      chatInputEl.value = "";
+      processBotReply(text);
+    }
+
+    function addUserMessage(text) {
+      addMessage("user", text);
+    }
+
+    function addBotMessage(text) {
+      addMessage("bot", text);
+    }
+
+    function addMessage(sender, text) {
+      const row = document.createElement("div");
+      row.classList.add("message-row", sender);
+
+      const msg = document.createElement("div");
+      msg.classList.add("message", sender);
+
+      const bubble = document.createElement("div");
+      bubble.classList.add("bubble");
+      bubble.textContent = text;
+
+      const timeEl = document.createElement("span");
+      timeEl.classList.add("time");
+      timeEl.textContent = getCurrentTime();
+
+      msg.appendChild(bubble);
+      msg.appendChild(timeEl);
+      row.appendChild(msg);
+      chatMessagesEl.appendChild(row);
+
+      chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+    }
+
+    function getCurrentTime() {
+      const now = new Date();
+      const h = now.getHours().toString().padStart(2, "0");
+      const m = now.getMinutes().toString().padStart(2, "0");
+      return `${h}:${m}`;
+    }
+
+    function processBotReply(userText) {
+      const normalized = userText.toLowerCase();
+
+      // ESTAT A1: NOM (B: “X”) → accepta qualsevol cosa
+      if (currentState === "A1") {
+        userName = userText.trim();
+        const replyA2 = `Encantat de coneixe’t ${userName}. En què et puc ajudar?`;
+        delayedBotMessage(replyA2);
+        currentState = "A2";
+        return;
+      }
+
+      // RESTA D’ESTATS: busquem paraules clau B1
+      const candidates = botRules.filter((rule) => rule.state === currentState);
+      let selectedRule = null;
+
+      for (const rule of candidates) {
+        if (
+          rule.keywords.some((keyword) =>
+            normalized.includes(keyword.toLowerCase())
+          )
+        ) {
+          selectedRule = rule;
+          break;
+        }
+      }
+
+      if (selectedRule) {
+        // B1: resposta correcta → Ax + canvi d’estat
+        delayedBotMessage(selectedRule.reply);
+        if (selectedRule.nextState) {
+          currentState = selectedRule.nextState;
+        }
+      } else {
+        // B2: sense cap paraula clau → Ax.2
+        const fb = fallbackReplies[currentState];
+        delayedBotMessage(fb || defaultReply);
+        // No canviem d’estat
+      }
+    }
+  </script>
+</body>
+</html>
 
