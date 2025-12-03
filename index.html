@@ -73,7 +73,6 @@
 
     .chat-messages {
       flex: 1;
-      /* FONS FOSC TIPUS WHATSAPP, SENSE IMATGE EXTERNA */
       background: radial-gradient(circle at top left, #202c33 0%, #111b21 45%, #0b141a 100%);
       padding: 10px 8px;
       overflow-y: auto;
@@ -179,7 +178,6 @@
       border-radius: 3px;
     }
 
-    /* Indicador "escrivint..." */
     .typing-bubble {
       font-size: 11px;
       font-style: italic;
@@ -187,6 +185,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="chat-wrapper">
     <div class="chat-header">
@@ -204,98 +203,121 @@
     <div id="chatMessages" class="chat-messages"></div>
 
     <div class="chat-input-area">
-      <input
-        type="text"
-        id="chatInput"
-        placeholder="Escriu un missatge"
-        autocomplete="off"
-      />
-      <button id="sendButton" aria-label="Enviar">
-        <span>➤</span>
-      </button>
+      <input type="text" id="chatInput" placeholder="Escriu un missatge" autocomplete="off"/>
+      <button id="sendButton" aria-label="Enviar"><span>➤</span></button>
     </div>
   </div>
 
   <script>
     /************************************************************
-     * ESTATS DEL GUIÓ:
-     * - A1: Hola! Com et dius?  (espera nom, qualsevol cosa)
-     * - A2: En què et puc ajudar? (clau/contrasenya... → A3; si no → A2.2)
-     * - A3: Quin és el meu nom? (Gutenberg... → A4; si no → A3.2)
-     * - A4: Recordes on vaig nèixer? (Alemanya/Magúncia... → FI; si no → A4.2)
+     * ESTATS DEL GUIÓ A1–A9 COMPLETS
      ************************************************************/
-
+    
     let currentState = "A1";
     let userName = "";
 
-    // REGLES B1 (respostes correctes) per a cada estat
     const botRules = [
+      /* A2 */
       {
-        // A2: En què et puc ajudar? → paraules sobre contrasenya
         state: "A2",
         keywords: [
-          "clau",
-          "contrassenya",
-          "contrasenya",
-          "codi",
-          "contraseña",
-          "contrasseña",
-          "números",
-          "numeros",
-          "combinació",
-          "combinacion"
+          "clau", "contrassenya", "contrasenya", "codi", "contraseña",
+          "contrasseña", "números", "numeros", "combinació", "combinacion"
         ],
         reply:
-          "Ahh sí, la contrassenya! Crec que jo tenia un codi per activar el sistema d’autoreparació de la màquina del temps! El problema és que ha passat molt de temps i no el recordo.\nAjuda’m a recuperar la memòria contestant unes preguntes sobre mi.\nQuin és el meu nom?",
+          "Ahh sí, la contrasenya! Crec que jo tenia un codi per activar el sistema d’autoreparació de la màquina del temps! El problema és que ha passat molt de temps i no el recordo.\nAjuda’m a recuperar la memòria contestant unes preguntes sobre mi.\nQuin és el meu nom?",
         nextState: "A3"
       },
+
+      /* A3 */
       {
-        // A3: Quin és el meu nom? → variants de Gutenberg
         state: "A3",
         keywords: [
-          "gutenberg",
-          "gutemberg",
-          "guttemberg",
-          "guttenberg"
+          "gutenberg", "gutemberg", "guttemberg", "guttenberg"
         ],
         reply:
-          "Gràcies per ajudar-me, ja vaig recuperant la memòria. Però encara necessito més informació.\nRecordes on vaig nèixer?",
+          "Gràcies per ajudar-me, ja vaig recuperant la memòria. Però encara necessito més informació.\nRecordes on vaig néixer?",
         nextState: "A4"
       },
+
+      /* A4 */
       {
-        // A4: Recordes on vaig nèixer? → Alemanya / Magúncia
         state: "A4",
         keywords: [
-          "alemanya",
-          "alemania",
-          "magúncia",
-          "maguncia"
+          "alemanya", "alemania",
+          "magúncia", "maguncia"
         ],
         reply:
-          "Exacte! Recordes perfectament on vaig nèixer. 👏\n(A partir d’aquí podem afegir més preguntes o revelar el codi final.)",
-        nextState: "FI"
+          "Cert! Quins records! Vaig néixer a la ciutat de Magúncia a Alemanya.\nI què vaig inventar?",
+        nextState: "A5"
+      },
+
+      /* A5 */
+      {
+        state: "A5",
+        keywords: [
+          "imprempta", "impremta", "imprenta"
+        ],
+        reply:
+          "És veritat! Recordo que ningú confiava en el meu invent, però va acabar sent tot un èxit!\nPerò aleshores com s’escrivien els llibres abans de la invenció de la impremta?",
+        nextState: "A6"
+      },
+
+      /* A6 */
+      {
+        state: "A6",
+        keywords: [
+          "mà", "manual", "manualment", "copiant", "copies", "còpies"
+        ],
+        reply:
+          "És clar! Ja estic recuperant la memòria, tinc la contrasenya de la màquina del temps a la punta de la llengua.\nAjuda’m contestant un parell de preguntes més.\nDe quin material vaig fer les lletres de la meva impremta?",
+        nextState: "A7"
+      },
+
+      /* A7 */
+      {
+        state: "A7",
+        keywords: [
+          "metall", "metal", "ferro", "coure", "acer",
+          "hierro", "cobre", "acero",
+          "metalico", "metalica",
+          "metàlica", "metàliques", "metaliques", "metalicas"
+        ],
+        reply:
+          "Ja quasi la tinc!\nQuin és el primer llibre que vaig imprimir amb la impremta?",
+        nextState: "A8"
+      },
+
+      /* A8 */
+      {
+        state: "A8",
+        keywords: [
+          "biblia", "bíblia", "Biblia", "Bíblia",
+          "biblias", "biblies", "Bíblies", "Biblias"
+        ],
+        reply:
+          "Perfecte! Ja només queda una última cosa...",
+        nextState: "A9"
       }
     ];
 
-    // Respostes Ax.2 (quan NO hi ha cap paraula clau B1)
     const fallbackReplies = {
-      A2: "Ho sento, no t’he entés. En què puc ajudar-te?",
-      A3: "Ho sento, no t’he entés. Quin és el meu nom?",
-      A4: "Ho sento, no t’he entés. On vaig nèixer?"
+      A2: "Ho sento, no t’he entès. En què puc ajudar-te?",
+      A3: "Ho sento, no t’he entès. Quin és el meu nom?",
+      A4: "Ho sento, no t’he entès. On vaig néixer?",
+      A5: "Ho sento, no t’he entès. Què vaig inventar?",
+      A6: "Ho sento, no t’he entès. Com s’escrivien els llibres abans de la impremta?",
+      A7: "Ho sento, no t’he entès. De quin material vaig fer les lletres de la meva impremta?",
+      A8: "Ho sento, no t’he entès. Quin és el primer llibre que vaig imprimir amb la impremta?"
     };
 
-    // Missatge genèric per si algun estat no te fallback específic
-    const defaultReply =
-      "No acabo d’entendre el que m’has escrit... Prova d’una altra manera.";
 
-    const chatMessagesEl = document.getElementById("chatMessages");
-    const chatInputEl = document.getElementById("chatInput");
-    const sendButtonEl = document.getElementById("sendButton");
-
-    // ---------- FUNCIONS TIPING INDICATOR ----------
-
+    /************************************************************
+     * FUNCIÓ TIPING + ENVIAMENT AMB RETARD
+     ************************************************************/
+    
     function showTyping() {
-      if (document.getElementById("typingIndicator")) return; // ja està mostrant
+      if (document.getElementById("typingIndicator")) return;
       const row = document.createElement("div");
       row.classList.add("message-row", "bot");
       row.id = "typingIndicator";
@@ -315,32 +337,32 @@
 
     function hideTyping() {
       const typingEl = document.getElementById("typingIndicator");
-      if (typingEl) {
-        chatMessagesEl.removeChild(typingEl);
-      }
+      if (typingEl) typingEl.remove();
     }
 
     function delayedBotMessage(text) {
       showTyping();
-      const delay = 1200 + Math.random() * 800; // entre 1,2 i 2 segons aprox.
+      const delay = 1200 + Math.random() * 800;
       setTimeout(() => {
         hideTyping();
         addBotMessage(text);
       }, delay);
     }
 
-    // ---------- INICIALITZACIÓ: A1 ----------
+
+    /************************************************************
+     * CONTROL DEL XAT
+     ************************************************************/
+    
+    const chatMessagesEl = document.getElementById("chatMessages");
+    const chatInputEl = document.getElementById("chatInput");
+    const sendButtonEl = document.getElementById("sendButton");
 
     window.addEventListener("load", () => {
       delayedBotMessage("Hola! Com et dius?");
     });
 
-    // Enviar amb botó
-    sendButtonEl.addEventListener("click", () => {
-      handleSend();
-    });
-
-    // Enviar amb ENTER
+    sendButtonEl.addEventListener("click", () => handleSend());
     chatInputEl.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
@@ -351,7 +373,6 @@
     function handleSend() {
       const text = chatInputEl.value.trim();
       if (!text) return;
-
       addUserMessage(text);
       chatInputEl.value = "";
       processBotReply(text);
@@ -378,65 +399,63 @@
 
       const timeEl = document.createElement("span");
       timeEl.classList.add("time");
-      timeEl.textContent = getCurrentTime();
+      timeEl.textContent = new Date().toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
 
       msg.appendChild(bubble);
       msg.appendChild(timeEl);
       row.appendChild(msg);
       chatMessagesEl.appendChild(row);
-
       chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
     }
 
-    function getCurrentTime() {
-      const now = new Date();
-      const h = now.getHours().toString().padStart(2, "0");
-      const m = now.getMinutes().toString().padStart(2, "0");
-      return `${h}:${m}`;
-    }
 
-    function processBotReply(userText) {
-      const normalized = userText.toLowerCase();
+    /************************************************************
+     * PROCESSADOR DE RESPOSTES A1–A9
+     ************************************************************/
+    
+    function processBotReply(text) {
+      const normalized = text.toLowerCase();
 
-      // ESTAT A1: NOM (B: “X”) → accepta qualsevol cosa
+      /* A1 — Nom */
       if (currentState === "A1") {
-        userName = userText.trim();
-        const replyA2 = `Encantat de coneixe’t ${userName}. En què et puc ajudar?`;
-        delayedBotMessage(replyA2);
+        userName = text.trim();
+        delayedBotMessage(`Encantat de conèixer-te ${userName}. En què et puc ajudar?`);
         currentState = "A2";
         return;
       }
 
-      // RESTA D’ESTATS: busquem paraules clau B1
-      const candidates = botRules.filter((rule) => rule.state === currentState);
-      let selectedRule = null;
+      /* Buscar regla B1 */
+      const candidates = botRules.filter(r => r.state === currentState);
+      const matchedRule = candidates.find(rule =>
+        rule.keywords.some(k => normalized.includes(k))
+      );
 
-      for (const rule of candidates) {
-        if (
-          rule.keywords.some((keyword) =>
-            normalized.includes(keyword.toLowerCase())
-          )
-        ) {
-          selectedRule = rule;
-          break;
-        }
+      if (matchedRule) {
+        delayedBotMessage(matchedRule.reply);
+        currentState = matchedRule.nextState;
+        return;
       }
 
-      if (selectedRule) {
-        // B1: resposta correcta → Ax + canvi d’estat
-        delayedBotMessage(selectedRule.reply);
-        if (selectedRule.nextState) {
-          currentState = selectedRule.nextState;
-        }
-      } else {
-        // B2: sense cap paraula clau → Ax.2
-        const fb = fallbackReplies[currentState];
-        delayedBotMessage(fb || defaultReply);
-        // No canviem d’estat
+      /* B2 — resposta incorrecta */
+      if (fallbackReplies[currentState]) {
+        delayedBotMessage(fallbackReplies[currentState]);
+        return;
+      }
+
+      /* A9 — final */
+      if (currentState === "A9") {
+        delayedBotMessage(
+          `Genial. Moltíssimes gràcies! Ja he recuperat la memòria!\n` +
+          `El codi per activar el sistema d’autoreparació de la màquina del temps és "curasana".\n` +
+          `Espero que et sigui útil i puguis reparar-la.\n` +
+          `Encantat d’haver-te conegut ${userName}. Fins a la propera!`
+        );
+        currentState = "FI";
+        return;
       }
     }
+
   </script>
 </body>
 </html>
-
 
